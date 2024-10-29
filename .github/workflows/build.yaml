@@ -38,7 +38,7 @@ jobs:
         id: image-info
         env: 
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: demo-frontend
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
           IMAGE_TAG: ${{ steps.image.outputs.version }}
         run: |
           echo "::set-output name=ecr-repository::$ECR_REPOSITORY"
@@ -60,10 +60,10 @@ jobs:
       - name: Update Kubernetes resources
         run: |
           echo ${{ steps.login-ecr.outputs.registry }}
-          echo ${{ steps.image-info.outputs.ecr_repository }}
+          echo ${{ steps.image-info.outputs.ecr-repository }}
           echo ${{ steps.image-info.outputs.image_tag }}
           cd k8s-manifest-repo/overlays/dev/
-          kustomize edit set image ${{ steps.login-ecr.outputs.registry}}/${{ steps.image-info.outputs.ecr_repository }}=${{ steps.login-ecr.outputs.registry}}/${{ steps.image-info.outputs.ecr_repository }}:${{ steps.image-info.outputs.image_tag }}
+          kustomize edit set image ${{ steps.login-ecr.outputs.registry }}/${{ steps.image-info.outputs.ecr_repository }}=${{ steps.login-ecr.outputs.registry }}/${{ steps.image-info.outputs.ecr_repository }}:${{ steps.image-info.outputs.image_tag }}
           cat kustomization.yaml
 
       - name: Commit files
@@ -73,4 +73,3 @@ jobs:
           git config --global user.name "github-actions"
           git commit -am "Update image tag"
           git push -u origin main
-
